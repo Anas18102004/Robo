@@ -2,30 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fullscreen Video Loop with Sound</title>
+  <title>Loop Video for iPad 9.3.5</title>
   <style>
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
-      width: 100%;
       overflow: hidden;
       background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      min-width: 100%;
-      min-height: 100%;
-      object-fit: cover; /* covers the screen fully */
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+      object-fit: cover;
     }
   </style>
 </head>
 <body>
-  <video autoplay loop playsinline>
-    <source src="LipSync.mp4" type="video/mp4">
-    Your browser does not support HTML5 video.
-  </video>
+  <video id="myVideo" src="LipSync.mp4" muted playsinline></video>
+
+  <script>
+    var vid = document.getElementById('myVideo');
+
+    // Force play on load
+    function playVideo() {
+      vid.play().catch(function(err){
+        console.log("Autoplay blocked, trying again on user interaction.");
+      });
+    }
+
+    // Loop manually in case iOS ignores 'loop'
+    vid.addEventListener('ended', function() {
+      vid.currentTime = 0;
+      vid.play();
+    });
+
+    // Try autoplay on load
+    playVideo();
+
+    // iOS might require a user interaction
+    document.addEventListener('click', function() {
+      playVideo();
+    });
+  </script>
 </body>
 </html>
