@@ -2,51 +2,371 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Loop Video for iPad 9.3.5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Controller</title>
   <style>
-    body, html {
+    * {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      box-sizing: border-box;
     }
-    video {
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -250px;
+      left: -250px;
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    body::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      bottom: -200px;
+      right: -200px;
+      animation: float 15s infinite ease-in-out reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(50px, 50px); }
+    }
+    
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 50px 40px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      max-width: 500px;
       width: 100%;
-      height: auto;
-      max-height: 100%;
-      object-fit: cover;
+    }
+    
+    h1 {
+      text-align: center;
+      color: white;
+      font-size: 36px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      letter-spacing: 1px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+    
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      background: #00ff88;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #00ff88;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .status-text {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .controller {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+    
+    .controller button {
+      height: 90px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .controller button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .controller button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .controller button:active {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+    
+    .controller button:active::before {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .btn-stop {
+      background: linear-gradient(135deg, #ffd89b 0%, #ff6b6b 100%) !important;
+      font-weight: bold;
+    }
+    
+    .btn-stop:hover {
+      background: linear-gradient(135deg, #ffed4e 0%, #ff4757 100%) !important;
+    }
+    
+    .empty-cell {
+      pointer-events: none;
+    }
+    
+    .servo-controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    
+    .servo-controls button {
+      flex: 1;
+      height: 65px;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .servo-controls button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .servo-controls button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #7c8ef7 0%, #8b5ec2 100%);
+    }
+    
+    .servo-controls button:active {
+      transform: translateY(-1px);
+    }
+    
+    .servo-controls button:active::before {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .feedback {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(0, 255, 136, 0.9);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+    
+    .feedback.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .controller button {
+        height: 70px;
+        font-size: 24px;
+      }
+      
+      .servo-controls button {
+        height: 55px;
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <video id="myVideo" src="LipSync.mp4" muted playsinline></video>
-
+  <elevenlabs-convai agent-id="agent_9101k6stm32ef5k9x9nx94wz7qe4"></elevenlabs-convai>
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+  <div class="container">
+    <h1>🤖 Robot Controller</h1>
+    <p class="subtitle">Advanced Navigation System</p>
+    
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      <span class="status-text">System Ready</span>
+    </div>
+    
+    <div class="controller">
+      <div class="empty-cell"></div>
+      <button onclick="sendCommand('/api/forward', 'Forward')" title="Move Forward">⬆️</button>
+      <div class="empty-cell"></div>
+      
+      <button onclick="sendCommand('/api/left', 'Left')" title="Turn Left">⬅️</button>
+      <button class="btn-stop" onclick="sendCommand('/api/stop', 'Stop')" title="Stop">⏹️</button>
+      <button onclick="sendCommand('/api/right', 'Right')" title="Turn Right">➡️</button>
+      
+      <div class="empty-cell"></div>
+      <button onclick="sendCommand('/api/backward', 'Backward')" title="Move Backward">⬇️</button>
+      <div class="empty-cell"></div>
+    </div>
+    
+    <div class="servo-controls">
+      <button onclick="sendCommand('/api/servo/30', 'Hand Up')" title="Raise Hand">
+        <span>👋</span> Hand Up
+      </button>
+      <button onclick="sendCommand('/api/servo/90', 'Hand Down')" title="Lower Hand">
+        <span>👇</span> Hand Down
+      </button>
+    </div>
+  </div>
+  
+  <div class="feedback" id="feedback"></div>
+  
   <script>
-    var vid = document.getElementById('myVideo');
-
-    // Force play on load
-    function playVideo() {
-      vid.play().catch(function(err){
-        console.log("Autoplay blocked, trying again on user interaction.");
-      });
+    function sendCommand(endpoint, action) {
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = `✓ ${action}`;
+      feedback.classList.add('show');
+      
+      setTimeout(() => {
+        feedback.classList.remove('show');
+      }, 2000);
+      
+      fetch(endpoint, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => console.log("Response:", data))
+        .catch(err => {
+          console.error("Error:", err);
+          feedback.textContent = `✗ Error: ${action}`;
+          feedback.style.background = 'rgba(255, 107, 107, 0.9)';
+          feedback.classList.add('show');
+          setTimeout(() => {
+            feedback.classList.remove('show');
+            feedback.style.background = 'rgba(0, 255, 136, 0.9)';
+          }, 2000);
+        });
     }
-
-    // Loop manually in case iOS ignores 'loop'
-    vid.addEventListener('ended', function() {
-      vid.currentTime = 0;
-      vid.play();
-    });
-
-    // Try autoplay on load
-    playVideo();
-
-    // iOS might require a user interaction
-    document.addEventListener('click', function() {
-      playVideo();
+    
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowUp':
+        case 'w':
+          sendCommand('/api/forward', 'Forward');
+          e.preventDefault();
+          break;
+        case 'ArrowDown':
+        case 's':
+          sendCommand('/api/backward', 'Backward');
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+        case 'a':
+          sendCommand('/api/left', 'Left');
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'd':
+          sendCommand('/api/right', 'Right');
+          e.preventDefault();
+          break;
+        case ' ':
+          sendCommand('/api/stop', 'Stop');
+          e.preventDefault();
+          break;
+      }
     });
   </script>
 </body>
