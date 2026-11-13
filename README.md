@@ -6,7 +6,13 @@
 [![Control](https://img.shields.io/badge/Actuation-GPIO_PWM-blue)](https://pypi.org/project/RPi.GPIO/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An integrated embedded robotics platform combining real-time optical computer vision, motor actuation, and web-based teleoperation on an edge Raspberry Pi 4 compute core.
+<div align="center">
+
+<img src="docs/assets/jerry_animation.gif" width="300" alt="Jerry the Robot - Animated Head & Eyes Demonstration" style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+
+*Figure 1: Live physical prototype demonstrating animated expressive LCD eyes, speech lipsync, and pan-tilt head articulation.*
+
+</div>
 
 ---
 
@@ -15,14 +21,26 @@ An integrated embedded robotics platform combining real-time optical computer vi
 Physical robotic agents operating in unstructured domestic or educational environments must reconcile multi-modal sensor inputs—optical video streams, directional navigation commands, and actuator control loops—under strict edge compute constraints.
 
 **Jerry** is an autonomous mobile robot built on a Raspberry Pi 4 that integrates:
-- Real-time video frame capture and streaming via OpenCV.
-- Dual-channel DC motor propulsion using pulse-width modulation (PWM) via an L298N H-bridge driver.
-- A responsive, low-latency browser teleoperation interface (`index.html`) for manual override and diagnostic steering.
-- Hardware-in-the-loop audio feedback and visual indicators for operational state monitoring.
+- **Perception & Vision:** Real-time video frame capture and streaming via OpenCV and top-mounted optical webcam.
+- **Auditory & Voice Interface:** Audio speech capture via head-mounted lavalier microphone, speech recognition, and expressive animated LCD facial feedback.
+- **Differential Mobility:** Dual-channel DC motor propulsion using pulse-width modulation (PWM) via an L298N H-bridge driver.
+- **Web Teleoperation Gateway:** A responsive, low-latency browser teleoperation interface (`index.html`) for manual override, joystick steering, and diagnostic telemetry.
 
 ---
 
-## 2. Hardware Architecture & Pinout Specification
+## 2. Physical Hardware Architecture & Prototype
+
+<div align="center">
+
+<img src="docs/assets/jerry_hardware_hero.jpg" width="240" alt="Hardware Overview" style="border-radius: 8px;" />
+&nbsp;
+<img src="docs/assets/jerry_hallway_mobile.jpg" width="240" alt="Mobile Hallway Stance" style="border-radius: 8px;" />
+&nbsp;
+<img src="docs/assets/jerry_teleop_demo.jpg" width="240" alt="Teleoperation in Action" style="border-radius: 8px;" />
+
+*Figure 2: (Left) Front hardware profile showing Logitech webcam, microphone, animated LCD face, and articulated mechanical arm. (Center) Mobile chassis standing in testing corridor. (Right) Field teleoperation testing via mobile web controller.*
+
+</div>
 
 ```mermaid
 flowchart LR
@@ -31,27 +49,33 @@ flowchart LR
     end
 
     subgraph Power ["Power Distribution"]
-        Battery["Li-ion Battery Pack<br>(12V Main + 5V Regulated)"]
+        Battery["Li-ion Battery Pack<br>(12V Motor Rail + 5V Logic Rail)"]
     end
 
-    subgraph Actuation ["Mobility & Actuation"]
+    subgraph Actuation ["Mobility & Articulation"]
         L298N["L298N H-Bridge Driver"]
-        MotorL["Left DC Motor (Tracks/Wheels)"]
-        MotorR["Right DC Motor (Tracks/Wheels)"]
+        MotorL["Left DC Drive Motor"]
+        MotorR["Right DC Drive Motor"]
+        ArmServo["Articulated Arm Servo"]
     end
 
     subgraph Sensors ["Perception & Telemetry"]
-        Cam["Camera Sensor Module (USB / CSI)"]
+        Cam["Logitech Webcam (Optical Capture)"]
+        Mic["Head Microphone (Audio Capture)"]
+        LCD["LCD Facial Display (Emotional Feedback)"]
         WebUI["Web Teleoperation Client (Browser)"]
     end
 
-    Battery -->|12V Logic & Motor| L298N
+    Battery -->|12V Motor Power| L298N
     Battery -->|5V USB-C| RPi
     RPi -->|BCM GPIO 17, 18, 22, 23| L298N
     RPi -->|PWM ENA: 27, ENB: 24 (1 kHz)| L298N
     L298N --> MotorL
     L298N --> MotorR
-    Cam -->|Optical Video Stream| RPi
+    RPi --> ArmServo
+    Cam -->|USB Video Stream| RPi
+    Mic -->|Audio Input Stream| RPi
+    RPi -->|HDMI / SPI Display| LCD
     WebUI <-->|HTTP / Flask REST & MJPEG| RPi
 ```
 
@@ -68,7 +92,7 @@ flowchart LR
 
 ---
 
-## 3. Software Architecture & Control Loop
+## 3. Software Architecture & Control Loops
 
 - **`main.py`:** Flask HTTP camera capture microservice. Initializes optical video capture (`cv2.VideoCapture(0)`), acquires uncompressed frames, and exposes `/capture` endpoint for streaming.
 - **`servo.py`:** Edge motor control server utilizing `RPi.GPIO`. Implements continuous 1 kHz PWM frequency modulation to adjust differential drive velocity during forward, reverse, turning, and pivoting maneuvers.
@@ -80,6 +104,12 @@ flowchart LR
 
 ```
 Robo/
+├── docs/
+│   └── assets/                         # Visual demonstration assets
+│       ├── jerry_animation.gif         # 3-second looping facial & head movement GIF
+│       ├── jerry_hardware_hero.jpg     # Front hardware profile with sensors
+│       ├── jerry_hallway_mobile.jpg    # Full mobile stance photograph
+│       └── jerry_teleop_demo.jpg       # Field teleoperation testing photograph
 ├── main.py                             # Camera video capture & streaming service
 ├── servo.py                            # GPIO PWM differential motor driver service
 ├── index.html                          # Web teleoperation interface & joystick
@@ -94,12 +124,14 @@ Robo/
 
 ## 5. Prerequisites & Hardware Setup
 
-### Hardware Requirements
+### Hardware Components
 1. Raspberry Pi 4 Model B (2GB+ RAM).
 2. L298N Dual H-Bridge Motor Driver Module.
-3. 2x Geared DC Motors with chassis/wheels.
-4. USB or CSI Camera Module (640x480 or 1280x720).
-5. External power supply (e.g., 2S/3S Li-ion pack) with common ground to Raspberry Pi.
+3. 2× Geared DC Motors with chassis/wheels.
+4. Optical Webcam (Logitech C270 / equivalent USB module).
+5. Head-mounted audio microphone.
+6. LCD Display for animated facial feedback.
+7. External power supply (e.g., 2S/3S Li-ion pack) with common ground to Raspberry Pi.
 
 ### Software Installation
 
