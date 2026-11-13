@@ -8,9 +8,31 @@
 
 <div align="center">
 
-<img src="docs/assets/jerry_animation.gif" width="300" alt="Jerry the Robot - Animated Head & Eyes Demonstration" style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+### 🤖 Live Autonomous Prototype Demonstrations
 
-*Figure 1: Live physical prototype demonstrating animated expressive LCD eyes, speech lipsync, and pan-tilt head articulation.*
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/assets/jerry_driving.gif" width="280" alt="Jerry the Robot - Mobile Driving Demonstration" />
+      <br />
+      <strong>Autonomous Differential Mobility</strong>
+      <br />
+      <em>Jerry navigating hallway floor via dual-channel PWM motor control</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/assets/jerry_animation.gif" width="280" alt="Jerry the Robot - Facial Feedback and Lipsync" />
+      <br />
+      <strong>Expressive Facial & Speech Feedback</strong>
+      <br />
+      <em>Real-time animated LCD eyes and synchronized speech interaction</em>
+    </td>
+  </tr>
+</table>
+
+<p>
+  🎬 <strong><a href="docs/assets/jerry_driving_demo.mp4">Watch Full 8.7s Mobile Driving Video (MP4)</a></strong> &nbsp;|&nbsp; 
+  🎬 <strong><a href="WhatsApp%20Video%202025-09-30%20at%2007.36.21_b3b4546f.mp4">Watch Hardware Testing Video (MP4)</a></strong>
+</p>
 
 </div>
 
@@ -28,55 +50,48 @@ Physical robotic agents operating in unstructured domestic or educational enviro
 
 ---
 
-## 2. Physical Hardware Architecture & Prototype
+## 2. Physical Hardware Architecture & Gallery
 
-<div align="center">
-
-<img src="docs/assets/jerry_hardware_hero.jpg" width="240" alt="Hardware Overview" style="border-radius: 8px;" />
-&nbsp;
-<img src="docs/assets/jerry_hallway_mobile.jpg" width="240" alt="Mobile Hallway Stance" style="border-radius: 8px;" />
-&nbsp;
-<img src="docs/assets/jerry_teleop_demo.jpg" width="240" alt="Teleoperation in Action" style="border-radius: 8px;" />
-
-*Figure 2: (Left) Front hardware profile showing Logitech webcam, microphone, animated LCD face, and articulated mechanical arm. (Center) Mobile chassis standing in testing corridor. (Right) Field teleoperation testing via mobile web controller.*
-
-</div>
+| Optical Perception & Articulation | Differential Mobility Chassis | Field Teleoperation Interface |
+| :---: | :---: | :---: |
+| <img src="docs/assets/jerry_hardware_hero.jpg" width="220" alt="Hardware Overview" /> | <img src="docs/assets/jerry_hallway_mobile.jpg" width="220" alt="Mobile Hallway Stance" /> | <img src="docs/assets/jerry_teleop_demo.jpg" width="220" alt="Teleoperation in Action" /> |
+| **Logitech Webcam, Lavalier Mic & Articulated Arm** | **L298N Motor Base with High-Torque Rubber Wheels** | **Live Smartphone Web Joystick Dashboard** |
 
 ```mermaid
 flowchart LR
-    subgraph Compute ["Compute Core"]
-        RPi["Raspberry Pi 4<br>(Linux Ubuntu / Pi OS)"]
+    subgraph Compute [Compute Core]
+        RPi["Raspberry Pi 4 Model B"]
     end
 
-    subgraph Power ["Power Distribution"]
-        Battery["Li-ion Battery Pack<br>(12V Motor Rail + 5V Logic Rail)"]
+    subgraph Power [Power Distribution]
+        Battery["Li-ion Battery Pack - 12V and 5V Rails"]
     end
 
-    subgraph Actuation ["Mobility & Articulation"]
-        L298N["L298N H-Bridge Driver"]
+    subgraph Actuation [Mobility and Articulation]
+        L298N["L298N Dual H-Bridge Driver"]
         MotorL["Left DC Drive Motor"]
         MotorR["Right DC Drive Motor"]
         ArmServo["Articulated Arm Servo"]
     end
 
-    subgraph Sensors ["Perception & Telemetry"]
-        Cam["Logitech Webcam (Optical Capture)"]
-        Mic["Head Microphone (Audio Capture)"]
-        LCD["LCD Facial Display (Emotional Feedback)"]
-        WebUI["Web Teleoperation Client (Browser)"]
+    subgraph Perception [Sensors and Interfaces]
+        Cam["Logitech Webcam Module"]
+        Mic["Head-Mounted Microphone"]
+        LCD["LCD Facial Display Screen"]
+        WebUI["Web Teleoperation Client"]
     end
 
     Battery -->|12V Motor Power| L298N
-    Battery -->|5V USB-C| RPi
-    RPi -->|BCM GPIO 17, 18, 22, 23| L298N
-    RPi -->|PWM ENA: 27, ENB: 24 (1 kHz)| L298N
+    Battery -->|5V Logic Power| RPi
+    RPi -->|Direction Logic: BCM 17, 18, 22, 23| L298N
+    RPi -->|Speed Control: 1 kHz PWM ENA 27, ENB 24| L298N
     L298N --> MotorL
     L298N --> MotorR
     RPi --> ArmServo
-    Cam -->|USB Video Stream| RPi
+    Cam -->|USB Optical Video Stream| RPi
     Mic -->|Audio Input Stream| RPi
-    RPi -->|HDMI / SPI Display| LCD
-    WebUI <-->|HTTP / Flask REST & MJPEG| RPi
+    RPi -->|Display Interface| LCD
+    WebUI <-->|HTTP REST and MJPEG Stream| RPi
 ```
 
 ### GPIO Pin Mapping (Broadcom / BCM Mode)
@@ -106,6 +121,8 @@ flowchart LR
 Robo/
 ├── docs/
 │   └── assets/                         # Visual demonstration assets
+│       ├── jerry_driving.gif           # Mobile hallway driving animation (from IMG_6917)
+│       ├── jerry_driving_demo.mp4      # Full mobile driving video (from IMG_6917)
 │       ├── jerry_animation.gif         # 3-second looping facial & head movement GIF
 │       ├── jerry_hardware_hero.jpg     # Front hardware profile with sensors
 │       ├── jerry_hallway_mobile.jpg    # Full mobile stance photograph
